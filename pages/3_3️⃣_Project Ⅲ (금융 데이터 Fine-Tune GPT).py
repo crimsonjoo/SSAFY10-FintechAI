@@ -209,7 +209,7 @@ def gpt(user_name,user_date,service_type):
                             bot_message('무엇을 도와드릴까요?')
                         
 
-                        # while 문 적용하기 ?
+                        # while 문 적용하기 ? --> Llama2 or Fine-tune GPT
                         prompt = st.chat_input("> 원하는 질문 입력")
                         if prompt:
                             with st.chat_message("user"):   
