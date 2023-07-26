@@ -321,7 +321,7 @@ def PJT1():
     # 메인 화면 GUI
     st.title("SSAFY PJT I")
     st.subheader(" : 금융/경제 지식교육 RetrievalGPT")
-    st.text("\t\t- 개발자 : 주정수 (joojs2004@gmail.com)")
+    st.markdown('- 명세서 개발자 : 주정수 joojs2004@gmail.com')
     # with st.sidebar:
     #     user_input = st.text_input("당신의 질문 : ", key="user_input")
     st.title(" ")

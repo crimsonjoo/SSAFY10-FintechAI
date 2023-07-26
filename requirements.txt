@@ -14,6 +14,7 @@ youtube-transcript-api
 youtube_dl
 pytube3
 requests
+replicate
 selenium
 webdriver-manager
 BeautifulSoup4
