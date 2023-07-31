@@ -27,13 +27,6 @@ from langchain.vectorstores import Chroma
 
 
 def init(): # Web App 설정
-    load_dotenv()
-
-    if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
-        print("OPENAI의 API 키를 설정해주세요.")
-        exit(1)
-    else:
-        print("OPENAI의 API 키를 성공적으로 적용했습니다!")
 
     st.set_page_config(
         page_title="SAFFY 금융/경제 지식교육 GPT"
@@ -315,7 +308,7 @@ def PJT3():
 
     
     with st.sidebar:
-        st.header('사용자 지정 입력')
+        st.header('사용자 정보 입력')
         st.text('')
 
         
@@ -331,7 +324,7 @@ def PJT3():
         chatbot_type= st.selectbox("🎯  서비스 부문", ('완전판매 모니터링',))
         st.caption('')
 
-        st.header('챗봇 모델 선정')
+        st.header('쳇봇모델 정보 입력')
         st.text('')
 
         
@@ -407,7 +400,7 @@ def PJT3():
 
 
     st.divider()
-    st.header(f"🔊🤖 {service_type} {chatbot_type} 음성봇")
+    st.header(f"🔊🤖 {service_type} {chatbot_type} 챗봇")
     st.caption('')
 
 

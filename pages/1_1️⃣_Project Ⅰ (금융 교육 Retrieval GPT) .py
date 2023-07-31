@@ -6,8 +6,8 @@ from PyPDF2 import PdfReader
 from pytube import Playlist,YouTube
 from youtube_transcript_api import YouTubeTranscriptApi
 import streamlit as st
+import openai
 from streamlit_chat import message
-from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
 from langchain.document_loaders import TextLoader
@@ -65,7 +65,7 @@ def load_documents(source_dir):
     all_files = os.listdir(source_dir)
     return [load_single_document(f"{source_dir}/{file_name}") for file_name in all_files]
 
-def get_response_from_query(vector_db, query, target, k=7):
+def get_response_from_query(vector_db, query, target, k):
     """
     gpt-3.5-turbo-16k can handle up to 16k tokens. Setting the chunksize to 1000 and k to 7 maximizes
     the number of tokens to analyze.
@@ -261,20 +261,13 @@ def Crawling_DB_Adult():
 
 # //설정창=============================================
 def init(): # Web App 설정
-    load_dotenv()
-
-    if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
-        print("OPENAI의 API 키를 설정해주세요.")
-        exit(1)
-    else:
-        print("OPENAI의 API 키를 성공적으로 적용했습니다!")
 
     st.set_page_config(
         page_title="SAFFY 금융/경제 지식교육 GPT"
     )
 
+
 def init_db(): # [어린이/청소년/성인] 맞춤형 VectorDB 구축
-    load_dotenv()
 
     # //Text DB 구축====================================
     # Crawling_DB_Child()
@@ -314,6 +307,62 @@ def init_db(): # [어린이/청소년/성인] 맞춤형 VectorDB 구축
 
 
 
+def finance_gpt(user_name,user_input,refer_db):
+    st.header('')
+    k = int(refer_db[0])
+    
+    # 질문 입력시,
+    with st.container():
+        # 사용자 질문 GUI 표시
+        message(user_input,is_user=True)
+        st.subheader('')
+
+        # LLM , Embedding 세팅
+        embedding = OpenAIEmbeddings()
+        level_dict = {'어린이':'Child','청소년':'Student','성인':'Adult'}
+
+        level_kr = user_name
+        level_en = level_dict[level_kr]
+
+        st.subheader(" ")
+        st.subheader(f'{level_kr} 맞춤 답변')
+        with st.spinner(f"{level_kr} 맞춤형 답변 생성중..."):
+            vector_db = FAISS.load_local(f"DB/vector/{level_en}",embedding)
+            response, docs = get_response_from_query(vector_db, user_input, level_en, k)
+
+        # GPT 답변
+        message(response, is_user=False)
+        st.title('')
+        st.title('')
+
+
+        st.subheader(f'{level_kr} 맞춤 답변 참고 문헌 ({refer_db})')
+        doc_name_list = [d.metadata['source'].split("/")[-1] for d in docs]
+        doc_content_list = [d.page_content for d in docs]
+
+        for i in range(k):
+            idx = i+1
+            st.text('')
+            st.text(f'참고 문헌 {idx}.')
+            with st.expander(f'{doc_name_list[i]}'):
+                st.info(doc_content_list[i])
+            st.header('')
+
+
+
+        # # 참고 문헌
+        # with st.expander(f'{level_kr} 맞춤 답변 참고 문헌 ({refer_db})'):
+        #     doc_names_list = [d.metadata['source'].split("/")[-1] for d in docs]
+        #     doc_names = ' / '.join(doc_names_list)
+        #     st.info(doc_names)
+        # st.subheader("")
+
+        
+
+
+
+
+
 # Web App 실행 함수
 def PJT1():
     init()
@@ -324,52 +373,97 @@ def PJT1():
     st.markdown('- 명세서 개발자 : 주정수 joojs2004@gmail.com')
     # with st.sidebar:
     #     user_input = st.text_input("당신의 질문 : ", key="user_input")
-    st.title(" ")
-    st.title(" ")
-    with st.form("my_form"):
-        user_input = st.text_input('금융/경제 관련 질문', '예시) 금융공부를 해야하는 이유를 알려줘')
-        submitted = st.form_submit_button("질문 입력")
+    
+    with st.sidebar:
+        st.header('사용자 정보 입력')
+        st.text('')
 
+        user_name = st.selectbox("🎯 교육 대상", ('','어린이','청소년','성인',))
+        st.caption('')
+
+        finance_db = st.selectbox("💰 금융/경제 지식 DB", ('','한국은행'))
+        st.caption('')
+
+        refer_db = st.selectbox("📚 참고문헌 건수", ('','3건','4건','5건',))
+        st.caption('')
+
+        st.header('쳇봇모델 정보 입력')
+        st.text('')
+
+        
+        chatgpt_api = st.text_input('ChatGPT API Key:', type='password')
+        if chatgpt_api:
+            st.success('API Key 확인 완료!', icon='✅')
+            os.environ["OPENAI_API_KEY"] = chatgpt_api
+        else:
+            st.warning('API key를 입력하세요.', icon='⚠️')
+
+        st.text('')
+        st.text('')
+        st.subheader('📋 옵션')
+        gpt_visualize = st.checkbox('🤖 챗봇 시작하기')
+
+
+    st.divider()
+    st.title(f"🎯 {user_name} 맞춤 금융/경제 교육")
+    st.caption('')
+    st.title(" ")
+    st.title(" ")
     
 
-    # 질문 입력시,
-    if user_input:
+    ##### PJT1 또한, PJT2,3 와 같이 옆의 sidebar에 plot 옵션 기능을 넣어서 선택시, 난이도 별로 문답 진행할 수 있게 modify + api key 입력 받아서 진행할 수 있게....
+    if gpt_visualize:
+        with st.form("my_form"):
+            user_input = st.text_input('금융/경제 관련 질문', '예시) 금융공부를 해야하는 이유를 알려줘')
+            submitted = st.form_submit_button("질문 입력")
+
         st.divider()
         st.title(" ")
-        st.title(" ")
+        finance_gpt(user_name,user_input,refer_db)
 
-        with st.container():
-            st.subheader(" ")
-            # 사용자 질문 GUI 표시
-            message(user_input,is_user=True)
+    ###############################
+    
+    
+
+
+    # # 질문 입력시,
+    # if user_input:
+    #     st.divider()
+    #     st.title(" ")
+    #     st.title(" ")
+
+    #     with st.container():
+    #         st.subheader(" ")
+    #         # 사용자 질문 GUI 표시
+    #         message(user_input,is_user=True)
             
-            # LLM , Embedding 세팅
-            embedding = OpenAIEmbeddings()
+    #         # LLM , Embedding 세팅
+    #         embedding = OpenAIEmbeddings()
 
-            list_en=['Child','Student','Adult']
-            list_kr=['어린이','청소년','성인']
+    #         list_en=['Child','Student','Adult']
+    #         list_kr=['어린이','청소년','성인']
 
-            for level_en,level_kr in zip(list_en,list_kr):
-                st.subheader(" ")
-                st.header(f'{level_kr} 맞춤 답변')
-                with st.spinner(f"{level_kr} 맞춤형 답변 생성중..."):
-                    vector_db = FAISS.load_local(f"DB/vector/{level_en}",embedding)
-                    response, docs = get_response_from_query(vector_db, user_input, level_en)
+    #         for level_en,level_kr in zip(list_en,list_kr):
+    #             st.subheader(" ")
+    #             st.header(f'{level_kr} 맞춤 답변')
+    #             with st.spinner(f"{level_kr} 맞춤형 답변 생성중..."):
+    #                 vector_db = FAISS.load_local(f"DB/vector/{level_en}",embedding)
+    #                 response, docs = get_response_from_query(vector_db, user_input, level_en)
 
-                # GPT 답변
-                message(response, is_user=False)
+    #             # GPT 답변
+    #             message(response, is_user=False)
 
-                # 참고 문헌
-                with st.expander(f'{level_kr} 맞춤 답변 참고 문헌'):
-                    doc_names_list = [d.metadata['source'].split("/")[-1] for d in docs]
-                    doc_names = ' / '.join(doc_names_list)
-                    st.info(doc_names)
+    #             # 참고 문헌
+    #             with st.expander(f'{level_kr} 맞춤 답변 참고 문헌'):
+    #                 doc_names_list = [d.metadata['source'].split("/")[-1] for d in docs]
+    #                 doc_names = ' / '.join(doc_names_list)
+    #                 st.info(doc_names)
 
                 
-                st.subheader("")
+    #             st.subheader("")
             
-            
-            
+
+
 
 # # // VectorDB 구축==============================================================
 # init_db()   # Text -> VectorDB 구축을 위해 최초 실행 (첨부한 DB.Zip파일로 대체 가능)

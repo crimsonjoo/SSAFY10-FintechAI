@@ -668,7 +668,7 @@ def dart_crawling(company_name,start_date,end_date):
 
 
 
-def plot_gpt(stock_name,start_date,end_date):
+def plot_gpt(stock_name,start_date,end_date,chatgpt_api):
     embedding = OpenAIEmbeddings()
     st.title(f"🤖 {stock_name} 전자공시 GPT")
 
@@ -676,8 +676,8 @@ def plot_gpt(stock_name,start_date,end_date):
     dart_crawling(stock_name,start_date,end_date)
 
 
-    # Set OpenAI API key from Streamlit secrets
-    openai.api_key = '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'
+    # Set OpenAI API key from Streamlit secrets 
+    openai.api_key = chatgpt_api
 
     # Set a default model
     if "openai_model" not in st.session_state:
@@ -737,13 +737,6 @@ def get_stock_list(market):
     return fdr_list
 
 def init(): # Web App 설정
-    load_dotenv()
-
-    if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
-        print("OPENAI의 API 키를 설정해주세요.")
-        exit(1)
-    else:
-        print("OPENAI의 API 키를 성공적으로 적용했습니다!")
 
     st.set_page_config(
         page_title="SAFFY 금융 데이터 분석 GPT"
@@ -782,6 +775,21 @@ def PJT2():
         # df_list = fdr.StockListing(market.split(' ')[0])
         df_list = get_stock_list(market.split(' ')[0])
         stock = st.selectbox("📌 종목 선정", (f'{nm}({cd})' for cd,nm in zip(list(df_list['Code']),list(df_list['Name']))))
+
+
+
+        st.subheader('')
+        st.header('API key 입력')
+        st.text('')
+
+        
+        chatgpt_api = st.text_input('ChatGPT API Key:', type='password')
+        if chatgpt_api:
+            st.success('API Key 확인 완료!', icon='✅')
+            os.environ["OPENAI_API_KEY"] = chatgpt_api
+        else:
+            st.warning('API key를 입력하세요.', icon='⚠️')
+
         if stock:
             stock_name = stock.split('(')[0]
             stock_code = stock.split('(')[-1][:-1]
@@ -818,7 +826,7 @@ def PJT2():
         st.title('')
         st.divider()
         with st.spinner("전자공시 내역을 가져오고 있습니다..."):
-            plot_gpt(stock_name,start_date,end_date)
+            plot_gpt(stock_name,start_date,end_date,chatgpt_api)
 
 
 
