@@ -1,12 +1,18 @@
 import streamlit as st
 from dotenv import load_dotenv
+import base64
 import os
 import numpy as np
 from io import BytesIO
 import pandas as pd
 from PIL import Image
-import streamlit.components.v1 as components
+from audio_recorder_streamlit import audio_recorder
+from audiorecorder import audiorecorder
 import time
+from gtts import gTTS
+import playsound
+import pydub
+from IPython.display import Audio, display
 import graphviz
 import sounddevice as sd
 from scipy.io.wavfile import write
@@ -24,8 +30,6 @@ from langchain.vectorstores import Chroma
 
 
 
-
-
 def init(): # Web App 설정
 
     st.set_page_config(
@@ -34,9 +38,34 @@ def init(): # Web App 설정
 
 
 
+def autoplay_audio(file_path: str):
+    with open(file_path, "rb") as f:
+        data = f.read()
+        b64 = base64.b64encode(data).decode()
+        audio_id = st.markdown(
+            f"""
+            <audio controls autoplay="true" onended="this.remove()">
+            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+            </audio>
+            """,
+            unsafe_allow_html=True,
+        )
+        return audio_id
+
+
+# List to store messages that have been read
+read_messages = []
 
 @st.cache_resource(experimental_allow_widgets=True)
 def bot_message(assistant_response):
+
+    global read_messages  # Use the global list
+    # Check if the message has already been read
+    if assistant_response in read_messages:
+        return
+    # If not read, add it to the list and mark as read
+    read_messages.append(assistant_response)
+
     message_placeholder = st.empty()
     full_response = ""
     assistant_response = assistant_response
@@ -47,61 +76,19 @@ def bot_message(assistant_response):
         # Add a blinking cursor to simulate typing
         message_placeholder.markdown(full_response + "▌")
     message_placeholder.markdown(full_response)
-    # Add assistant response to chat history
-    # st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+    # Generate Korean audio using gTTS
+    kor_wav = gTTS(assistant_response, lang='ko')
+    kor_wav.save('tts.mp3')
+
+    audio_id = autoplay_audio('tts.mp3')
+    time.sleep(len(assistant_response) / 3.3)
+    os.remove('tts.mp3')
+    audio_id.empty()
 
 
 
-# Function for generating LLaMA2 response
-def generate_llama2_response(prompt_input,gpt_type,temperature,top_p,max_length):
-    string_dialogue = "You are a helpful assistant. You do not respond as 'User' or pretend to be 'User'. You only respond once as 'Assistant'."
-    for dict_message in st.session_state.messages:
-        if dict_message["role"] == "user":
-            string_dialogue += "User: " + dict_message["content"] + "\\n\\n"
-        else:
-            string_dialogue += "Assistant: " + dict_message["content"] + "\\n\\n"
-
-    if gpt_type == 'Llama2-7B':
-        llm = 'a16z-infra/llama7b-v2-chat:4f0a4744c7295c024a1de15e1a63c880d3da035fa1f49bfd344fe076074c8eea'
-    elif gpt_type == 'Llama2-13B':
-        llm = 'a16z-infra/llama13b-v2-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5'
-    else:
-        llm = 'replicate/llama70b-v2-chat:e951f18578850b652510200860fc4ea62b3b16fac280f83ff32282f87bbd2e48'
-
-    
-    output = replicate.run(llm, 
-                           input={"prompt": f"{string_dialogue} {prompt_input} Assistant: ",
-                                  "temperature":temperature, "top_p":top_p, "max_length":max_length, "repetition_penalty":1})
-    return output
-
-
-
-
-
-# def qa_gpt(replicate_api,gpt_type,temperature,top_p,max_length):
-#     # User-provided prompt
-#     if prompt := st.chat_input(disabled=not replicate_api):
-#         st.session_state.messages.append({"role": "user", "content": prompt})
-#         with st.chat_message("user"):
-#             st.write(prompt)
-
-#     # Generate a new response if last message is not from assistant
-#     if st.session_state.messages[-1]["role"] != "assistant":
-#         with st.chat_message("assistant"):
-#             with st.spinner("Thinking..."):
-#                 response = generate_llama2_response(prompt)
-#                 placeholder = st.empty()
-#                 full_response = ''
-#                 for item in response:
-#                     full_response += item
-#                     placeholder.markdown(full_response)
-#                 placeholder.markdown(full_response)
-#         message = {"role": "assistant", "content": full_response}
-#         st.session_state.messages.append(message)
-
-
-
-def gpt(user_name,user_date,service_type,replicate_api,gpt_type,temperature,top_p,max_length):
+def gpt(user_name,user_date,service_type):
     year = user_date.strftime('%Y')
     month = user_date.strftime('%M')
     day = user_date.strftime('%D')
@@ -117,8 +104,24 @@ def gpt(user_name,user_date,service_type,replicate_api,gpt_type,temperature,top_
 
 
     time.sleep(0.5)
-    with st.chat_message("user"): # 1. 본인 확인         
+    with st.chat_message("user"): # 1. 본인 확인
         chatbot1= st.selectbox("사용자 응답", ('《Ⅰ. 본인 확인 여부》','네','아니오'))
+
+        #voice-recorder- ver.1
+        # audio_bytes = audio_recorder(energy_threshold=(-1.0, 1.0), pause_threshold=2.0, sample_rate=41_000)
+        # if audio_bytes:
+        #     st.audio(audio_bytes, format="audio/wav")
+
+        #voice-recorder- ver.2
+        # audio = audiorecorder("Click to record", "Recording...")
+        # if len(audio) > 0:
+        #     # To play audio in frontend:
+        #     st.audio(audio.tobytes())
+            
+        #     # To save audio to a file:
+        #     wav_file = open("audio.mp3", "wb")
+        #     wav_file.write(audio.tobytes())
+
         
     if chatbot1 == '아니오': # 1. 본인 확인 - (아니오)
         with st.chat_message("assistant"):
@@ -130,10 +133,12 @@ def gpt(user_name,user_date,service_type,replicate_api,gpt_type,temperature,top_
 
     elif chatbot1 == '네': # 1. 본인 확인 - (네)
         with st.chat_message("assistant"):
-            bot_message(f'네! {user_name} 고객님, 반갑습니다 😀')
+            bot_message(f'네! {user_name} 고객님, 반갑습니다!')
             bot_message(f'저희 {service_type} 상품을 가입해주셔서 진심으로 감사드립니다.')
-            bot_message('가입하신 상품의 중요한 사항이 제대로 설명되었는지, 확인드리고자 연락드렸습니다')
-            bot_message('상담 예상 소요 시간은 5분입니다. 시간 괜찮으신가요?')
+            bot_message('가입하신 상품의 중요한 사항이 제대로 설명되었는지')
+            bot_message('확인드리고자 연락드렸습니다')
+            bot_message('상담 예상 소요 시간은 5분입니다.')
+            bot_message('시간 괜찮으신가요?')
 
         time.sleep(0.5)
         with st.chat_message("user"): # 2. 통화 가능 여부            
@@ -172,17 +177,17 @@ def gpt(user_name,user_date,service_type,replicate_api,gpt_type,temperature,top_
 
         elif chatbot2 == '네': # 2. 통화 가능 여부 - (네)
             with st.chat_message("assistant"):
-                bot_message('고객님, 귀한 시간 내주셔서 감사합니다! 😄')
+                bot_message('고객님, 귀한 시간 내주셔서 감사합니다! ')
                 bot_message('지금부터 진행하는 내용은 고객님의 권리 보호를 위해 기록되며,')
-                bot_message('답변하신 내용은 향후 민원 발생시, 중요한 근거자료로 활용되오니,')
+                bot_message('답변하신 내용은 향후 민원 발생시,')
+                bot_message('중요한 근거자료로 활용되오니,')
                 bot_message('정확한 답변 부탁드립니다.')
-                bot_message('')
-                bot_message('')
                 
                 bot_message(f'계약자와 피보험자가 다른 계약의 경우, {user_name} 고객님의')
                 bot_message(f'계약체결에 대한 동의가 반드시 필요합니다.')
-                bot_message(f'자필서명이 정확히 이루어지지 않은 경우, 무효계약으로 간주되어')
-                bot_message(f'고객님께서 직접적인 불이익 또는 손해를 입으실 수 있습니다.')
+                bot_message(f'자필서명이 정확히 이루어지지 않은 경우,')
+                bot_message(f'무효계약으로 간주되어 고객님께서 직접적인')
+                bot_message(f'불이익 또는 손해를 입으실 수 있습니다.')
                 bot_message('고객님께서 청약서에 직접 자필서명을 하셨는지요?')
 
             time.sleep(0.5)
@@ -218,8 +223,6 @@ def gpt(user_name,user_date,service_type,replicate_api,gpt_type,temperature,top_
                     bot_message('네! 확인 감사합니다. 마지막으로 질문 한 가지 드리겠습니다.')
                     bot_message('직업, 건강상태 등 계약 전 알려야 할 의무 사항을 속이거나')
                     bot_message('제대로 알리지 않아 발생할 수 있는 모든 불이익은 고객님께 귀속됩니다.')
-                    bot_message('')
-                    bot_message('')
                     bot_message('고객님께서는 해당 내용을 모두 정확히 확인하시고 작성하셨습니까?')
 
                 time.sleep(0.5)
@@ -235,62 +238,56 @@ def gpt(user_name,user_date,service_type,replicate_api,gpt_type,temperature,top_
 
                 elif chatbot4 == '네': # 4. 내용 인지 확인 - 네
                     with st.chat_message("assistant"):   
-                        bot_message('소중한 시간 내주셔서 감사드립니다. 향후 불편하시거나 궁금하신점 있으시면,')
-                        bot_message('담당자나 콜센터로 언제든지 연락주시기 바랍니다 😊')
-                        bot_message('기타 문의하실 추가 사항이 있으신가요?')
-
-                    time.sleep(0.5)
-                    with st.chat_message("user"): # [5. 추가 질문]            
-                        chatbot5 = st.selectbox("사용자 응답", ('《Ⅴ. 추가 질문 여부》','아니오','네'))
-
-                    if chatbot5 == '아니오':
-                        with st.chat_message("assistant"):   
-                            bot_message('상담을 종료하겠습니다. 좋은 하루 되세요.')
-                            bot_message('감사합니다 🤗')
-                        with st.chat_message("system"):   
-                            bot_message('상담이 종료되었습니다.')
-
-                    elif chatbot5 == '네':                       
-                        if "messages" not in st.session_state:
-                            st.session_state.messages = [{{"role": "assistant", "content": "무엇을 도와드릴까요?"}}] 
-
-                        for message in st.session_state.messages:
-                            with st.chat_message(message["role"]):
-                                st.write(message["content"])
-
-                        if prompt := st.chat_input(disabled=not replicate_api):
-                            st.session_state.messages.append({"role": "user", "content": prompt})
-                            with st.chat_message("user"):
-                                st.write(prompt)
-
-                        # Generate a new response if last message is not from assistant
-                        # if st.session_state.messages[-1]["role"] != "assistant":
-                        with st.chat_message("assistant"):
-                            with st.spinner("Thinking..."):
-                                response = generate_llama2_response(prompt,gpt_type,temperature,top_p,max_length)
-                                placeholder = st.empty()
-                                full_response = ''
-                                for item in response:
-                                    full_response += item
-                                    placeholder.markdown(full_response)
-                                placeholder.markdown(full_response)
-                        message = {"role": "assistant", "content": full_response}
-                        st.session_state.messages.append(message)
-                        # # while 문 적용하기 ? --> Llama2 or Fine-tune GPT
-                        # prompt = st.chat_input("> 원하는 질문 입력")
-                        # if prompt:
-                        #     with st.chat_message("user"):   
-                        #         bot_message(prompt)
+                        bot_message('소중한 시간 내주셔서 감사드립니다.')
+                        bot_message('향후 불편하시거나 궁금하신점 있으시면,')
+                        bot_message('담당자나 콜센터로 언제든지 연락주시기 바랍니다.')
+                        bot_message('감사합니다.')
 
 
+                    ######################################### Llama2 GPT (Open Source LLM) ###########################
+                    # time.sleep(0.5)
+                    # with st.chat_message("user"): # [5. 추가 질문]            
+                    #     chatbot5 = st.selectbox("사용자 응답", ('《Ⅴ. 추가 질문 여부》','아니오','네'))
 
+                    # if chatbot5 == '아니오':
+                    #     with st.chat_message("assistant"):   
+                    #         bot_message('상담을 종료하겠습니다. 좋은 하루 되세요.')
+                    #         bot_message('감사합니다.')
+                    #     with st.chat_message("system"):   
+                    #         bot_message('상담이 종료되었습니다.')
 
+                    # elif chatbot5 == '네':                       
+                    #     if "messages" not in st.session_state:
+                    #         st.session_state.messages = [{{"role": "assistant", "content": "무엇을 도와드릴까요?"}}] 
 
+                    #     for message in st.session_state.messages:
+                    #         with st.chat_message(message["role"]):
+                    #             st.write(message["content"])
 
+                    #     if prompt := st.chat_input(disabled=not replicate_api):
+                    #         st.session_state.messages.append({"role": "user", "content": prompt})
+                    #         with st.chat_message("user"):
+                    #             st.write(prompt)
 
-
-
-
+                    #     # Generate a new response if last message is not from assistant
+                    #     # if st.session_state.messages[-1]["role"] != "assistant":
+                    #     with st.chat_message("assistant"):
+                    #         with st.spinner("Thinking..."):
+                    #             response = generate_llama2_response(prompt,gpt_type,temperature,top_p,max_length)
+                    #             placeholder = st.empty()
+                    #             full_response = ''
+                    #             for item in response:
+                    #                 full_response += item
+                    #                 placeholder.markdown(full_response)
+                    #             placeholder.markdown(full_response)
+                    #     message = {"role": "assistant", "content": full_response}
+                    #     st.session_state.messages.append(message)
+                    #     # # while 문 적용하기 ? --> Llama2 or Fine-tune GPT
+                    #     # prompt = st.chat_input("> 원하는 질문 입력")
+                    #     # if prompt:
+                    #     #     with st.chat_message("user"):   
+                    #     #         bot_message(prompt)
+                    #######################################################################################################
 
 
 
@@ -324,52 +321,14 @@ def PJT3():
         chatbot_type= st.selectbox("🎯  서비스 부문", ('완전판매 모니터링',))
         st.caption('')
 
-        st.header('쳇봇모델 정보 입력')
-        st.text('')
-
-        
-        replicate_api = st.text_input('Replicate API Key:', type='password')
-        if replicate_api:
-            st.success('API Key 확인 완료!', icon='✅')
-        else:
-            st.warning('API key를 입력하세요.', icon='⚠️')
-
-        st.text('')
-        gpt_type= st.selectbox("🧠  GPT 모델 (LLM) ", ('Llama2-7B','Llama2-13B','Llama2-70B'))
-        st.caption('')
-        temperature = st.sidebar.slider('temperature', min_value=0.01, max_value=5.0, value=0.1, step=0.01)
-        st.caption('')
-        top_p = st.sidebar.slider('top_p', min_value=0.01, max_value=1.0, value=0.9, step=0.01)
-        st.caption('')
-        max_length = st.sidebar.slider('max_length', min_value=64, max_value=4096, value=512, step=8)
-        st.text('')
-
-
-        # if service_type == '은행':
-        #     chatbot_type= st.selectbox("🔊🤖  음성봇 선택", ('완전판매 모니터링',))
-        #     st.text('')
-
-        # if service_type == '보험':
-        #     chatbot_type= st.selectbox("🔊🤖  음성봇 선택", ('완전판매 모니터링',))
-        #     st.text('')
-
-        # if service_type == '카드':
-        #     chatbot_type= st.selectbox("🔊🤖  음성봇 선택", ('완전판매 모니터링',))
-        #     st.text('')
-
-        # elif service_type == '증권':
-        #     chatbot_type= st.selectbox("🔊🤖  음성봇 선택", ('완전판매 모니터링',))
-        #     st.text('')
-  
-
         st.subheader('📋 옵션')
-        flow_visualize = st.checkbox('📊 시스템 구성도')
-        plot_voicegpt = st.checkbox('🔊🤖 챗봇 상담 시작')
+        flow_visualize = st.checkbox('📊 플로우차트')
+        plot_voicegpt = st.checkbox('🔊🤖 시나리오 음성봇 상담')
         
 
     if flow_visualize:
         st.divider()
-        st.header('📊 시스템 구성도')
+        st.header('📊 플로우차트')
         st.header('')
 
         graph = graphviz.Digraph()
@@ -400,15 +359,12 @@ def PJT3():
 
 
     st.divider()
-    st.header(f"🔊🤖 {service_type} {chatbot_type} 챗봇")
+    st.header(f"🔊🤖 {service_type} {chatbot_type} 음성봇")
     st.caption('')
 
 
-
-
-
     if plot_voicegpt:
-        gpt(user_name,user_date,service_type,replicate_api,gpt_type,temperature,top_p,max_length)
+        gpt(user_name,user_date,service_type)
 
 
 
