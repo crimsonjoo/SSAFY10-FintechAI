@@ -13,19 +13,20 @@ from langchain.chains import LLMChain
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
 from langchain.vectorstores.faiss import FAISS
-from dotenv import find_dotenv, load_dotenv
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
-from io import BufferedWriter 
-import textwrap
-import pickle
-import zlib
-import googletrans
+
+# from dotenv import find_dotenv, load_dotenv
+# from langchain.vectorstores import Chroma
+# from io import BufferedWriter 
+# import textwrap
+# import pickle
+# import zlib
+# import googletrans
 
 
 # //데이터 추출============================================

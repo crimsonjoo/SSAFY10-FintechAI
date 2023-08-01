@@ -1,9 +1,7 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
 import re
 import os
-from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 import FinanceDataReader as fdr
 from mpl_finance import candlestick_ohlc
@@ -13,18 +11,23 @@ import datetime
 import OpenDartReader
 import openai
 from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationSummaryBufferMemory
 from langchain.chains import LLMChain
-from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
 from langchain.vectorstores.faiss import FAISS
 from langchain.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
 )
+
+
+
+# from langchain.memory import ConversationSummaryBufferMemory
+# from langchain.document_loaders import TextLoader
+# from langchain.vectorstores import Chroma
+# from dotenv import load_dotenv
+# import pandas as pd
 
 
 

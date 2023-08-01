@@ -1,32 +1,32 @@
 import streamlit as st
-from dotenv import load_dotenv
 import base64
 import os
-import numpy as np
-from io import BytesIO
-import pandas as pd
-from PIL import Image
-from audio_recorder_streamlit import audio_recorder
-from audiorecorder import audiorecorder
 import time
 from gtts import gTTS
-import playsound
-import pydub
-from IPython.display import Audio, display
 import graphviz
-import sounddevice as sd
 from scipy.io.wavfile import write
-import wavio as wv
 import datetime
-import replicate
 from streamlit_drawable_canvas import st_canvas
-from langchain.llms import LlamaCpp
-from langchain.embeddings import LlamaCppEmbeddings
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
-from langchain.document_loaders import TextLoader
-from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores import Chroma
+
+
+# import numpy as np
+# from io import BytesIO
+# import pandas as pd
+# from PIL import Image
+# import playsound
+# from IPython.display import Audio, display
+# import sounddevice as sd
+# import wavio as wv
+# from audio_recorder_streamlit import audio_recorder
+# from audiorecorder import audiorecorder
+# import replicate
+# from langchain.llms import LlamaCpp
+# from langchain.embeddings import LlamaCppEmbeddings
+# from langchain.prompts import PromptTemplate
+# from langchain.chains import LLMChain
+# from langchain.document_loaders import TextLoader
+# from langchain.text_splitter import CharacterTextSplitter
+# from langchain.vectorstores import Chroma
 
 
 
