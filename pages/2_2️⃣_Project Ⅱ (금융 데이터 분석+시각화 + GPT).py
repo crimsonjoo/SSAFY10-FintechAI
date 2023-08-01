@@ -752,7 +752,7 @@ def PJT2():
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("SSAFY PJT II")
     st.subheader(" : 금융 데이터 분석/시각화 + 전자공시 GPT")
-    st.markdown('- 명세서 개발자 : 주정수 joojs2004@gmail.com')
+    st.markdown('- 개발자 : 주정수  010-2967-4968 / joojs2004@gmail.com')
     # with st.sidebar:
     #     user_input = st.text_input("당신의 질문 : ", key="user_input")
 
