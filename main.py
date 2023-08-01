@@ -91,20 +91,16 @@ st.subheader("")
 # // 서브프로젝트3========================================================
 st.subheader("\t3️⃣ Project Ⅲ")
 st.subheader("")
-st.text(": 금융 데이터 Fine-Tune Retrieval GPT를 활용한 서비스 ")
+st.text(": 금융 시나리오 음성봇")
 text = '''
 - 실시간 고객 응대 서비스
-- [음성 분석(STT) > 각종 문서(KMS,상품약관 등..) > DB Retrieval > 답변 발화(TTS)]
+- [음성 분석(STT) > 각종 문서(KMS,상품약관 등..) > 시나리오 챗봇 > 답변 발화(TTS)]
 '''
 st.code(text)
 st.text("> 서비스 구성")
 text = '''
-- Kaggle Data
-- STT / TTS (Whisper / gtts ...)
-- Opensource LLMs (gpt4all ...)
-- Opensource Embeddings (HuggingFace ...)
-- Fine-Tunning
-- Langchain
+- 시나리오
+- TTS (Whisper / gtts ...)
 '''
 st.code(text)
 st.subheader("")

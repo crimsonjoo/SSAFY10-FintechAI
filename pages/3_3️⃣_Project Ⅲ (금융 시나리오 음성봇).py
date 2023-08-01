@@ -297,7 +297,7 @@ def PJT3():
     
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("Project III")
-    st.subheader(" : 금융 데이터 Fine-tune GPT")
+    st.subheader(" : 금융 시나리오 음성봇")
     st.markdown('- 명세서 개발자 : 주정수 joojs2004@gmail.com')
     
     # with st.sidebar:
