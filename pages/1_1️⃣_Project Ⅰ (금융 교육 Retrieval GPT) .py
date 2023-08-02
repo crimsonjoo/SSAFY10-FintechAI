@@ -67,11 +67,6 @@ def load_documents(source_dir):
     return [load_single_document(f"{source_dir}/{file_name}") for file_name in all_files]
 
 def get_response_from_query(vector_db, query, target, k):
-    """
-    gpt-3.5-turbo-16k can handle up to 16k tokens. Setting the chunksize to 1000 and k to 7 maximizes
-    the number of tokens to analyze.
-    """
-
     docs = vector_db.similarity_search(query, k=k)
     docs_page_content = " ".join([d.page_content for d in docs])
 
@@ -371,7 +366,8 @@ def PJT1():
     # 메인 화면 GUI
     st.title("SSAFY PJT I")
     st.subheader(" : 금융/경제 지식교육 RetrievalGPT")
-    st.markdown(" - 개발자 : 주정수 (P. 010-2967-4968 / E. joojs2004@gmail.com)")
+    st.markdown("개발자 : 주정수 (P. 010-2967-4968 / E. jungsoo.joo@maum.ai)")
+
 
     # with st.sidebar:
     #     user_input = st.text_input("당신의 질문 : ", key="user_input")

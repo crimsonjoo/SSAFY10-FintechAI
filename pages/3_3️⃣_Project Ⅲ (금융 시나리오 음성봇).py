@@ -298,7 +298,8 @@ def PJT3():
     st.set_option('deprecation.showPyplotGlobalUse', False)
     st.title("Project III")
     st.subheader(" : 금융 시나리오 음성봇")
-    st.markdown(" - 개발자 : 주정수 (P. 010-2967-4968 / E. joojs2004@gmail.com)")
+    st.markdown("개발자 : 주정수 (P. 010-2967-4968 / E. jungsoo.joo@maum.ai)")
+
 
     
     # with st.sidebar:
