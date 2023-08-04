@@ -29,9 +29,10 @@ st.subheader("\t0️⃣ 사전 프로젝트")
 st.text(": 자기주도형 프로젝트를 진행하기 위한 사전 도입 강의")
 text = '''
 1. 금융 데이터 활용법\t(Open API / FinanceDataReader ... )
-2. 데이터 시각화\t\t(Pandas / Matplotlib / Seaborn ... )
-3. 생성 AI 기초\t\t(ChatGPT API / LangChain ... )
-4. 생성 AI 심화\t\t(프롬프트 템플릿 / 엔지니어링 ...)
+2. 데이터 시각화\t\t(Pandas / Matplotlib / Streamlit ... )
+3. 생성 AI 기초\t\t(ChatGPT / Playground / Document  ... )
+4. 생성 AI 응용\t\t(ChatGPT API / Langchain / Document ...)
+5. 생성 AI 심화\t\t(VectorDB / Custom GPT / Local LLM ...)
 '''
 st.code(text)
 st.subheader("")

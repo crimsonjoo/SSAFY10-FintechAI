@@ -4,7 +4,6 @@ import os
 import time
 from gtts import gTTS
 import graphviz
-from scipy.io.wavfile import write
 import datetime
 from streamlit_drawable_canvas import st_canvas
 

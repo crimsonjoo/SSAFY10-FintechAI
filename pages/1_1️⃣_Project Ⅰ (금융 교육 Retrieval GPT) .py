@@ -3,10 +3,9 @@ import os
 import requests
 from bs4 import BeautifulSoup
 from PyPDF2 import PdfReader
-from pytube import Playlist,YouTube
+from pytube import Playlist
 from youtube_transcript_api import YouTubeTranscriptApi
 import streamlit as st
-import openai
 from streamlit_chat import message
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import LLMChain
