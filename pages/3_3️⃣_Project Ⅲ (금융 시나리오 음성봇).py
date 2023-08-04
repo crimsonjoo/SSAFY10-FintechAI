@@ -6,6 +6,8 @@ from gtts import gTTS
 import graphviz
 import datetime
 from streamlit_drawable_canvas import st_canvas
+import speech_recognition as sr
+from audiorecorder import audiorecorder
 
 
 # import numpy as np
@@ -50,6 +52,41 @@ def autoplay_audio(file_path: str):
             unsafe_allow_html=True,
         )
         return audio_id
+
+
+def record_audio():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        st.write("Recording...")
+        audio = r.listen(source, phrase_time_limit=5)
+        st.write("Recording completed!")
+    return audio
+
+
+@st.cache_resource(experimental_allow_widgets=True)
+def recognize_audio(recognizer):
+    try:
+        with sr.Microphone() as source:
+            audio = recognizer.listen(source, timeout=0, phrase_time_limit=10)
+    except sr.RequestError as e:
+        st.write(f"Error with the speech recognition service; {e}")
+    except sr.WaitTimeoutError:
+        st.write("Recording timeout. Please try again.")
+    except sr.UnknownValueError:
+        st.write("Could not understand audio. Please try again.")
+    return audio
+
+
+def recognize_korean_speech(audio):
+    recognizer = sr.Recognizer()
+    try:
+        recognized_text = recognizer.recognize_google(audio, language='ko-KR')
+        return recognized_text
+    except sr.UnknownValueError:
+        return "Could not understand audio."
+    except sr.RequestError as e:
+        return f"Error with the speech recognition service; {e}"
+
 
 
 # List to store messages that have been read
@@ -105,23 +142,23 @@ def gpt(user_name,user_date,service_type):
     time.sleep(0.5)
     with st.chat_message("user"): # 1. 본인 확인
         chatbot1= st.selectbox("사용자 응답", ('《Ⅰ. 본인 확인 여부》','네','아니오'))
-
-        #voice-recorder- ver.1
-        # audio_bytes = audio_recorder(energy_threshold=(-1.0, 1.0), pause_threshold=2.0, sample_rate=41_000)
-        # if audio_bytes:
-        #     st.audio(audio_bytes, format="audio/wav")
-
-        #voice-recorder- ver.2
-        # audio = audiorecorder("Click to record", "Recording...")
-        # if len(audio) > 0:
-        #     # To play audio in frontend:
-        #     st.audio(audio.tobytes())
-            
-        #     # To save audio to a file:
-        #     wav_file = open("audio.mp3", "wb")
-        #     wav_file.write(audio.tobytes())
-
         
+        # recognizer = sr.Recognizer()   
+        # voice = st.checkbox("(예시) 음성인식")
+        # st.caption('( \'그렇습니다 / 아닙니다\' 중 한 가지를 선택해서 대답해주세요. )')
+        # if voice:
+        #     audio = recognize_audio(recognizer)
+        #     recognized_text = recognize_korean_speech(audio)
+
+        #     if recognized_text in ['아닙니다','아니오','아뇨','아니요','아님니다','아니','아님미다']:
+        #         chatbot1 = '아니오'
+        #     elif recognized_text in ['그렇습니다','네','그럽니다','그러습니다','그렇씁니다','맞습니다','그럿습니다','예','그러씁니다','크렇습니다','그럽습니다']:
+        #         chatbot1 = '네'
+        #     else:
+        #         st.write("인식에 실패했습니다. 다시 시도해주세요.")
+        
+
+
     if chatbot1 == '아니오': # 1. 본인 확인 - (아니오)
         with st.chat_message("assistant"):
             bot_message('죄송합니다.')
@@ -227,6 +264,7 @@ def gpt(user_name,user_date,service_type):
                 time.sleep(0.5)
                 with st.chat_message("user"): # [4. 내용 인지 확인]            
                     chatbot4 = st.selectbox("사용자 응답", ('《Ⅳ. 내용 인지 확인》','네','아니오'))
+
 
                 if chatbot4 == '아니오': # 4. 내용 인지 확인 - 아니오
                     with st.chat_message("assistant"):   

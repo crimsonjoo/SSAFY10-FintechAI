@@ -630,7 +630,7 @@ def extract_refine_text(html_string):
     return final_text
 
 
-def dart_crawling(company_name,start_date,end_date):
+def dart_crawling(company_name,start_date,end_date,opendart_api):
     key1 = '7c2985b5e2c8f41c132d6e2ea367b0929c752304'
     key2 = '9be6509f76d34bd1447a21924e959191930c998c'
     key3 = 'c1d474b5d7a4c5ed0d6f136c824ba23e93efb2bd'
@@ -649,7 +649,7 @@ def dart_crawling(company_name,start_date,end_date):
     api_key_list = [key1,key2,key3,key4,key5,key6,key7,key8,key9,key10,key11,key12,key13,key14,key15]
 
     embedding = OpenAIEmbeddings()
-    dart = OpenDartReader(key1) 
+    dart = OpenDartReader(opendart_api)
     dart_info_chart = dart.list(company_name,start=start_date,end=end_date)
 
     #공시이름    #공시번호
@@ -671,12 +671,12 @@ def dart_crawling(company_name,start_date,end_date):
 
 
 
-def plot_gpt(stock_name,start_date,end_date,chatgpt_api):
+def plot_gpt(stock_name,start_date,end_date,opendart_api,chatgpt_api):
     embedding = OpenAIEmbeddings()
     st.title(f"🤖 {stock_name} 전자공시 GPT")
 
     # Opendart API 에서 해당 기업의 공시내용 VectorDB 구축
-    dart_crawling(stock_name,start_date,end_date)
+    dart_crawling(stock_name,start_date,end_date,opendart_api)
 
 
     # Set OpenAI API key from Streamlit secrets 
@@ -760,16 +760,16 @@ def PJT2():
 
 
     with st.sidebar:
-        st.header('사용자 지정 입력')
+        st.header('사용자 지정 설정')
         st.subheader('')
         col1, col2 = st.columns(2)
-
+        today = datetime.datetime.today()
         with col1:
-            st_date = st.date_input("📅조회 시작", datetime.date(2023, 2, 3))
+            st_date = st.date_input("📅조회 시작", today-datetime.timedelta(weeks=4))
             start_date = str(st_date).replace('-','/')    
 
         with col2:
-            ed_date = st.date_input("📅조회 종료", datetime.datetime.today())
+            ed_date = st.date_input("📅조회 종료", today)
             end_date = str(ed_date).replace('-','/')
         
         st.subheader('')
@@ -787,6 +787,11 @@ def PJT2():
         st.header('API key 입력')
         st.text('')
 
+        opendart_api = st.text_input('OpenDart API Key:', type='password')
+        if opendart_api:
+            st.success('API Key 확인 완료!', icon='✅')
+        else:
+            st.warning('API key를 입력하세요.', icon='⚠️')
         
         chatgpt_api = st.text_input('ChatGPT API Key:', type='password')
         if chatgpt_api:
@@ -805,6 +810,13 @@ def PJT2():
                 data_visualize = st.checkbox('📈 데이터 시각화')
                 data_indicators = st.checkbox('📊 투자 성과 지표')
                 opendart_gpt = st.checkbox('🤖 전자공시 GPT')
+        st.text('')
+        st.text('')
+        st.caption('전자공시 GPT 사용 시, 조회 기간에 따라 준비시간이 크게 달라집니다.')
+        st.caption(f'이는 {start_date}부터 {end_date}까지 존재하는 {stock_name} 전자공시 내용을')
+        st.caption('텍스트 추출한 뒤, VectorDB로 변환하는 과정에 소요되는 시간을 의미합니다.')
+
+        
 
 
     st.divider()
@@ -830,10 +842,8 @@ def PJT2():
     if opendart_gpt:
         st.title('')
         st.divider()
-        with st.spinner("전자공시 내역을 가져오고 있습니다..."):
-            plot_gpt(stock_name,start_date,end_date,chatgpt_api)
-
-
+        with st.spinner(f"{stock_name} 전자공시 내역을 가져오고 있습니다..."):
+            plot_gpt(stock_name,start_date,end_date,opendart_api,chatgpt_api)
 
 
 
