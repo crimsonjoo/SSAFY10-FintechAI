@@ -63,7 +63,6 @@ def record_audio():
     return audio
 
 
-@st.cache_resource(experimental_allow_widgets=True)
 def recognize_audio(recognizer):
     try:
         with sr.Microphone() as source:
