@@ -6,7 +6,6 @@ from gtts import gTTS
 import graphviz
 import datetime
 from streamlit_drawable_canvas import st_canvas
-import speech_recognition as sr
 from audiorecorder import audiorecorder
 
 
@@ -28,7 +27,7 @@ from audiorecorder import audiorecorder
 # from langchain.document_loaders import TextLoader
 # from langchain.text_splitter import CharacterTextSplitter
 # from langchain.vectorstores import Chroma
-
+# import speech_recognition as sr
 
 
 def init(): # Web App 설정
@@ -54,37 +53,37 @@ def autoplay_audio(file_path: str):
         return audio_id
 
 
-def record_audio():
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.write("Recording...")
-        audio = r.listen(source, phrase_time_limit=5)
-        st.write("Recording completed!")
-    return audio
+# def record_audio():
+#     r = sr.Recognizer()
+#     with sr.Microphone() as source:
+#         st.write("Recording...")
+#         audio = r.listen(source, phrase_time_limit=5)
+#         st.write("Recording completed!")
+#     return audio
 
 
-def recognize_audio(recognizer):
-    try:
-        with sr.Microphone() as source:
-            audio = recognizer.listen(source, timeout=0, phrase_time_limit=10)
-    except sr.RequestError as e:
-        st.write(f"Error with the speech recognition service; {e}")
-    except sr.WaitTimeoutError:
-        st.write("Recording timeout. Please try again.")
-    except sr.UnknownValueError:
-        st.write("Could not understand audio. Please try again.")
-    return audio
+# def recognize_audio(recognizer):
+#     try:
+#         with sr.Microphone() as source:
+#             audio = recognizer.listen(source, timeout=0, phrase_time_limit=10)
+#     except sr.RequestError as e:
+#         st.write(f"Error with the speech recognition service; {e}")
+#     except sr.WaitTimeoutError:
+#         st.write("Recording timeout. Please try again.")
+#     except sr.UnknownValueError:
+#         st.write("Could not understand audio. Please try again.")
+#     return audio
 
 
-def recognize_korean_speech(audio):
-    recognizer = sr.Recognizer()
-    try:
-        recognized_text = recognizer.recognize_google(audio, language='ko-KR')
-        return recognized_text
-    except sr.UnknownValueError:
-        return "Could not understand audio."
-    except sr.RequestError as e:
-        return f"Error with the speech recognition service; {e}"
+# def recognize_korean_speech(audio):
+#     recognizer = sr.Recognizer()
+#     try:
+#         recognized_text = recognizer.recognize_google(audio, language='ko-KR')
+#         return recognized_text
+#     except sr.UnknownValueError:
+#         return "Could not understand audio."
+#     except sr.RequestError as e:
+#         return f"Error with the speech recognition service; {e}"
 
 
 
