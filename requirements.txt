@@ -32,4 +32,4 @@ yfinance
 mpl-finance
 mplfinance
 opendartreader
-SpeechRecognition
+SpeechRecognition==2.1.3
