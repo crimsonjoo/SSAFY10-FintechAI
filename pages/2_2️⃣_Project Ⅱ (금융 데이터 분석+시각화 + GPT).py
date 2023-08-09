@@ -631,22 +631,6 @@ def extract_refine_text(html_string):
 
 
 def dart_crawling(company_name,start_date,end_date,opendart_api):
-    key1 = '7c2985b5e2c8f41c132d6e2ea367b0929c752304'
-    key2 = '9be6509f76d34bd1447a21924e959191930c998c'
-    key3 = 'c1d474b5d7a4c5ed0d6f136c824ba23e93efb2bd'
-    key4 = 'fc6384bc82f6de71f0ebe09b2d965d128e77f122'
-    key5 = '74fe8759624b7a96a1d86de1d7a4d7a328a0bbc9'
-    key6 = '4cfb9ba88eabaa5ddd36ca0785abfad1bb3230d1'
-    key7 = 'f1b64f1875f8ff17afab4a2d4bc3cd78bd77c5aa'
-    key8 = 'd00d09c07db1b131db8c7bc7f9b0085fc1de1097'
-    key9 = 'b997869e8abd09e2a37c30e594758d9050434ca4'
-    key10 = 'f4e6d586e0839432b8cbfdf507b367d8ace48a1f'
-    key11 = '208c88ad51ec82d48d60fd4553f5a476bd17c972'
-    key12 = 'fc0cdee03e510336b94e9bd9d87a4f7b8ad2ba38'
-    key13 = 'dd8f550e7c6492165d0e7d553ff33c6e941aed8d'
-    key14 = '4cfb9ba88eabaa5ddd36ca0785abfad1bb3230d1'
-    key15 = '4412239660884f4b0e3ac6fd1ddca7c589076407'
-    api_key_list = [key1,key2,key3,key4,key5,key6,key7,key8,key9,key10,key11,key12,key13,key14,key15]
 
     embedding = OpenAIEmbeddings()
     dart = OpenDartReader(opendart_api)

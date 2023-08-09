@@ -166,9 +166,10 @@ def Crawling_DB_Child():
       soup = BeautifulSoup(response.content, 'html.parser')
 
       # Find the URL of the PDF file
-      pdf_url_suffix = soup.find('a', {'class': 'b-down lg bg-gray'})['href']
+      pdf_url_suffix = soup.find('div', {'class': 'addfile'})
+      pdf_url_suffix = pdf_url_suffix.find('a')['href']
       pdf_url = base_url + pdf_url_suffix
-
+      
       # Send a GET request to the PDF URL
       response = requests.get(pdf_url)
 
@@ -206,7 +207,8 @@ def Crawling_DB_Student():
       yt = requests.get(url)
       yt_text = BeautifulSoup(yt.text, 'lxml')
       title = yt_text.select_one('meta[itemprop="name"][content]')['content']
-
+      title = title.replace(":", "_")
+      
       url_id = url.split('v=')[-1]
       try:
         transcript_list = YouTubeTranscriptApi.get_transcript(url_id,languages=['ko'])
