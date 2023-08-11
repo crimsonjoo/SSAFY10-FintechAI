@@ -528,7 +528,7 @@ def plot_explain(quant):
         
         st.subheader('매매 판단 기준')
         st.text('매수 : 5일선이 20일선을 상향 돌파')
-        st.text('매도 : 20일선이 60일선을 상향 돌파')
+        st.text('매도 : 5일선이 20일선을 하향 돌파')
         st.header('')
 
 
@@ -555,7 +555,7 @@ def plot_explain(quant):
         
         st.subheader('매매 판단 기준')
         st.text('매수 : 20일선이 60일선을 상향 돌파')
-        st.text('매도 : 60일선이 20일선을 상향 돌파')
+        st.text('매도 : 20일선이 60일선을 하향 돌파')
         st.header('')
 
 
