@@ -367,8 +367,6 @@ def PJT1():
     # 메인 화면 GUI
     st.title("SSAFY PJT I")
     st.subheader(" : 금융/경제 지식교육 RetrievalGPT")
-    st.markdown("개발자 : 주정수 (P. 010-2967-4968 / E. jungsoo.joo@maum.ai)")
-
 
     # with st.sidebar:
     #     user_input = st.text_input("당신의 질문 : ", key="user_input")

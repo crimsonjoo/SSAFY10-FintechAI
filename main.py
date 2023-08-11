@@ -9,7 +9,6 @@ st.set_page_config(
 
 
 st.title("핀테크 AI 금융 서비스")
-st.markdown("개발자 : 주정수 (P. 010-2967-4968 / E. jungsoo.joo@maum.ai)")
 st.title("")
 
 st.header("☑ 목 차")
