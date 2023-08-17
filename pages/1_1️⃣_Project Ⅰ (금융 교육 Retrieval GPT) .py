@@ -19,13 +19,7 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate,
 )
 
-# from dotenv import find_dotenv, load_dotenv
-# from langchain.vectorstores import Chroma
-# from io import BufferedWriter 
-# import textwrap
-# import pickle
-# import zlib
-# import googletrans
+
 
 
 # //데이터 추출============================================
@@ -267,28 +261,28 @@ def init(): # Web App 설정
 def init_db(): # [어린이/청소년/성인] 맞춤형 VectorDB 구축
 
     # //Text DB 구축====================================
-    # Crawling_DB_Child()
-    # print("어린이용 금융/경제 DB 구축 완료")
+    Crawling_DB_Child()
+    print("어린이용 금융/경제 DB 구축 완료")
 
-    # Crawling_DB_Student()
-    # print("청소년용 금융/경제 DB 구축 완료")
+    Crawling_DB_Student()
+    print("청소년용 금융/경제 DB 구축 완료")
 
-    # Crawling_DB_Adult()
-    # print("성인용 금융/경제 DB 구축 완료")
-    #===================================================
+    Crawling_DB_Adult()
+    print("성인용 금융/경제 DB 구축 완료")
+    # #===================================================
 
 
-    # //Vector DB 구축==================================
+    # # //Vector DB 구축==================================
     if not os.path.exists(f"DB/vector"):
-            os.makedirs(f"DB/vector")
+        os.makedirs(f"DB/vector")
 
-    embedding = OpenAIEmbeddings()
-
+    # # //init_db()함수만을 호출 할때 함수 내에서 openai_api_key지정===========
+    embedding = OpenAIEmbeddings(openai_api_key='발급받은 OPENAI API Key를 입력해주세요')
+    
     list_en=['Child','Student','Adult']
     list_kr=['어린이','학생','성인']
 
     for level_en,level_kr in zip(list_en,list_kr):   
-        
         file_path = 'DB/text/' + level_en
         transcript = load_documents(file_path)
         
@@ -345,19 +339,7 @@ def finance_gpt(user_name,user_input,refer_db):
                 st.info(doc_content_list[i])
             st.header('')
 
-
-
-        # # 참고 문헌
-        # with st.expander(f'{level_kr} 맞춤 답변 참고 문헌 ({refer_db})'):
-        #     doc_names_list = [d.metadata['source'].split("/")[-1] for d in docs]
-        #     doc_names = ' / '.join(doc_names_list)
-        #     st.info(doc_names)
-        # st.subheader("")
-
         
-
-
-
 
 
 # Web App 실행 함수
@@ -367,9 +349,6 @@ def PJT1():
     # 메인 화면 GUI
     st.title("SSAFY PJT I")
     st.subheader(" : 금융/경제 지식교육 RetrievalGPT")
-
-    # with st.sidebar:
-    #     user_input = st.text_input("당신의 질문 : ", key="user_input")
     
     with st.sidebar:
         st.header('사용자 정보 입력')
@@ -384,7 +363,7 @@ def PJT1():
         refer_db = st.selectbox("📚 참고문헌 건수", ('','3건','4건','5건',))
         st.caption('')
 
-        st.header('쳇봇모델 정보 입력')
+        st.header('챗봇모델 정보 입력')
         st.text('')
 
         
@@ -408,7 +387,6 @@ def PJT1():
     st.title(" ")
     
 
-    ##### PJT1 또한, PJT2,3 와 같이 옆의 sidebar에 plot 옵션 기능을 넣어서 선택시, 난이도 별로 문답 진행할 수 있게 modify + api key 입력 받아서 진행할 수 있게....
     if gpt_visualize:
         with st.form("my_form"):
             user_input = st.text_input('금융/경제 관련 질문', '예시) 금융공부를 해야하는 이유를 알려줘')
@@ -418,47 +396,6 @@ def PJT1():
         st.title(" ")
         finance_gpt(user_name,user_input,refer_db)
 
-    ###############################
-    
-    
-
-
-    # # 질문 입력시,
-    # if user_input:
-    #     st.divider()
-    #     st.title(" ")
-    #     st.title(" ")
-
-    #     with st.container():
-    #         st.subheader(" ")
-    #         # 사용자 질문 GUI 표시
-    #         message(user_input,is_user=True)
-            
-    #         # LLM , Embedding 세팅
-    #         embedding = OpenAIEmbeddings()
-
-    #         list_en=['Child','Student','Adult']
-    #         list_kr=['어린이','청소년','성인']
-
-    #         for level_en,level_kr in zip(list_en,list_kr):
-    #             st.subheader(" ")
-    #             st.header(f'{level_kr} 맞춤 답변')
-    #             with st.spinner(f"{level_kr} 맞춤형 답변 생성중..."):
-    #                 vector_db = FAISS.load_local(f"DB/vector/{level_en}",embedding)
-    #                 response, docs = get_response_from_query(vector_db, user_input, level_en)
-
-    #             # GPT 답변
-    #             message(response, is_user=False)
-
-    #             # 참고 문헌
-    #             with st.expander(f'{level_kr} 맞춤 답변 참고 문헌'):
-    #                 doc_names_list = [d.metadata['source'].split("/")[-1] for d in docs]
-    #                 doc_names = ' / '.join(doc_names_list)
-    #                 st.info(doc_names)
-
-                
-    #             st.subheader("")
-            
 
 
 
